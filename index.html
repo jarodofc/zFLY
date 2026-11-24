@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RotaClara — Comparador de Voos</title>
+  <title>zFLY — Comparador de Voos</title>
   <meta name="description" content="Compare voos no Brasil e no mundo com interface clara, rápida e transparente.">
 
   <!-- Tailwind CSS via CDN -->
@@ -123,6 +123,21 @@
     }
 
     /* Atmospheric backdrop so Liquid Glass panels refract subtle color depth */
+    body { isolation: isolate; }
+    .zfly-sky { position: fixed; inset: 0; overflow: hidden; z-index: -1; pointer-events: none; color: var(--primary); }
+    .zfly-plane { position: absolute; left: -180px; width: 112px; opacity: .17; animation: zfly-flight 38s linear infinite; will-change: transform; }
+    .zfly-plane:nth-child(1) { top: 14%; animation-delay: -9s; }
+    .zfly-plane:nth-child(2) { top: 47%; width: 84px; opacity: .12; animation-duration: 52s; animation-delay: -31s; }
+    .zfly-plane:nth-child(3) { top: 78%; width: 132px; opacity: .11; animation-duration: 64s; animation-delay: -46s; }
+    @keyframes zfly-flight { from { transform: translate3d(-12vw, 40px, 0) rotate(-13deg); } to { transform: translate3d(calc(100vw + 220px), -110px, 0) rotate(-13deg); } }
+    .zfly-footer { margin: 24px auto 0; max-width: 76rem; padding: 0 16px; }
+    .zfly-footer-inner { padding: 16px 20px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; font-size:12px; color:var(--text-muted); }
+    .zfly-footer a { display:inline-flex; align-items:center; gap:8px; color:var(--text-primary); font-weight:600; text-decoration:none; }
+    .zfly-footer a:hover { color:var(--primary); }
+    .zfly-footer a:focus-visible { outline:2px solid var(--primary); outline-offset:5px; border-radius:4px; }
+    .zfly-data-status { font-size:12px; color:var(--text-muted); margin-top:8px; }
+    @media (prefers-reduced-motion: reduce) { .zfly-plane { animation:none; display:none; } }
+    [data-solid="true"] .zfly-sky { display:none; }
     .ambient-backdrop {
       position: fixed;
       inset: 0;
@@ -435,6 +450,7 @@
 </head>
 <body class="pb-24">
   <div class="ambient-backdrop" aria-hidden="true"></div>
+  <div class="zfly-sky" aria-hidden="true"><svg class="zfly-plane" viewBox="0 0 120 48" fill="none"><path d="M0 24h78" stroke="currentColor" stroke-width="1" stroke-dasharray="3 5"/><path d="M73 22l10-2-9-13 5-1 17 12 15-2c8-1 10 6 2 8l-17 2-17 16-5-1 9-14-10 1-5-7z" fill="currentColor"/></svg><svg class="zfly-plane" viewBox="0 0 120 48" fill="none"><path d="M0 24h78" stroke="currentColor" stroke-width="1" stroke-dasharray="3 5"/><path d="M73 22l10-2-9-13 5-1 17 12 15-2c8-1 10 6 2 8l-17 2-17 16-5-1 9-14-10 1-5-7z" fill="currentColor"/></svg><svg class="zfly-plane" viewBox="0 0 120 48" fill="none"><path d="M0 24h78" stroke="currentColor" stroke-width="1" stroke-dasharray="3 5"/><path d="M73 22l10-2-9-13 5-1 17 12 15-2c8-1 10 6 2 8l-17 2-17 16-5-1 9-14-10 1-5-7z" fill="currentColor"/></svg></div>
 
   <!-- Skip link for keyboard accessibility -->
   <a href="#mainContent" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 m3-btn-filled px-4 py-2 text-sm" data-i18n="a11y.skipToMain">
@@ -447,7 +463,7 @@
   <header class="sticky top-0 z-30 px-3 sm:px-6 pt-3 pb-2">
     <div class="max-w-7xl mx-auto glass-panel px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
       <!-- Brand Identity (Original Custom SVG Logo) -->
-      <a href="#top" id="brandHomeBtn" class="flex items-center gap-3 group rounded-xl pr-2" aria-label="RotaClara — Página inicial">
+      <a href="#top" id="brandHomeBtn" class="flex items-center gap-3 group rounded-xl pr-2" aria-label="zFLY — Página inicial">
         <div class="w-10 h-10 rounded-[13px] flex items-center justify-center shrink-0 shadow-sm"
              style="background: linear-gradient(135deg, #0b57d0 0%, #0ea5e9 55%, #14b8a6 100%); box-shadow: inset 0 1px 1px rgba(255,255,255,0.45), 0 4px 12px rgba(11,87,208,0.28);">
           <!-- Minimalist original wing + compass SVG -->
@@ -459,7 +475,7 @@
         </div>
         <div class="leading-tight">
           <div class="flex items-center gap-2">
-            <span class="text-lg font-extrabold tracking-tight" style="color: var(--text-primary);">RotaClara</span>
+            <span class="text-lg font-extrabold tracking-tight" style="color: var(--text-primary);">zFLY</span>
             <span class="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full"
                   style="background: var(--warning-bg); color: var(--warning-text); border: 1px solid var(--warning-border);"
                   data-i18n="badge.demoShort">Demonstração</span>
@@ -745,6 +761,13 @@
           </button>
         </div>
 
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <p id="airportCatalogStatus" class="zfly-data-status" role="status" data-i18n="airport.local">Catálogo local de aeroportos disponível.</p>
+          <button type="button" id="realFlightSearchBtn" class="m3-btn-outlined px-4 py-2 text-sm inline-flex items-center gap-2">
+            <span class="material-symbols-rounded text-[18px]" aria-hidden="true">open_in_new</span>
+            <span data-i18n="search.realExternal">Consultar voos reais no Google</span>
+          </button>
+        </div>
         <!-- Inline Form Validation Banner -->
         <div id="formErrorBox" role="alert" aria-live="polite" class="hidden rounded-2xl px-4 py-3 text-sm flex items-start gap-2.5"
              style="background: var(--danger-bg); border: 1px solid var(--danger-border); color: var(--danger-text);">
@@ -881,6 +904,15 @@
       </div>
     </section>
   </main>
+  <footer class="zfly-footer">
+    <div class="glass-panel zfly-footer-inner">
+      <div><strong>zFLY</strong> · <span data-i18n="footer.tagline">Explore o mundo, compare com clareza.</span></div>
+      <a href="https://github.com/jarodofc/zFLY" target="_blank" rel="noopener noreferrer" aria-label="GitHub — zFLY">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .75a11.25 11.25 0 0 0-3.56 21.92c.56.1.77-.24.77-.54v-2.09c-3.13.68-3.79-1.33-3.79-1.33-.51-1.3-1.25-1.65-1.25-1.65-1.02-.7.08-.69.08-.69 1.13.08 1.73 1.16 1.73 1.16 1 .1.1 0 0 0 1.11 1.91 2.91 1.36 3.62 1.04.11-.81.44-1.36.79-1.67-2.5-.28-5.13-1.25-5.13-5.56 0-1.23.44-2.23 1.16-3.02-.12-.28-.5-1.43.11-2.98 0 0 .95-.3 3.09 1.15a10.8 10.8 0 0 1 5.63 0c2.15-1.45 3.09-1.15 3.09-1.15.61 1.55.23 2.7.11 2.98.72.79 1.16 1.79 1.16 3.02 0 4.32-2.63 5.27-5.14 5.55.45.39.85 1.15.85 2.32v3.43c0 .3.2.65.77.54A11.25 11.25 0 0 0 12 .75Z"/></svg>
+        <span>GitHub</span><span style="font-weight:400;color:var(--text-muted)">/ jarodofc</span>
+      </a>
+    </div>
+  </footer>
 
   <!-- =========================================================================
        FLOATING LIQUID GLASS COMPARE BAR (UP TO 3 FLIGHTS)
@@ -1053,6 +1085,12 @@
           'search.directOnly': 'Somente voos diretos',
           'search.flexibleDates': 'Datas flexíveis (±3 dias)',
           'search.nearbyAirports': 'Aeroportos próximos',
+          'footer.tagline': 'Explore o mundo, compare com clareza.',
+          'airport.local': 'Catálogo local de aeroportos disponível.',
+          'airport.loading': 'Atualizando catálogo de aeroportos…',
+          'airport.online': 'Catálogo OurAirports: {n} aeroportos disponíveis.',
+          'airport.fallback': 'Catálogo local disponível; atualização online indisponível.',
+          'search.realExternal': 'Consultar voos reais no Google',
           'search.submit': 'Buscar voos',
           'search.searching': 'Buscando...',
           'search.addLeg': 'Adicionar trecho',
@@ -1216,6 +1254,12 @@
           'search.directOnly': 'Direct flights only',
           'search.flexibleDates': 'Flexible dates (±3 days)',
           'search.nearbyAirports': 'Nearby airports',
+          'footer.tagline': 'Explore the world, compare with clarity.',
+          'airport.local': 'Local airport catalog available.',
+          'airport.loading': 'Updating airport catalog…',
+          'airport.online': 'OurAirports catalog: {n} airports available.',
+          'airport.fallback': 'Local catalog available; online update unavailable.',
+          'search.realExternal': 'Find real flights on Google',
           'search.submit': 'Search flights',
           'search.searching': 'Searching...',
           'search.addLeg': 'Add flight leg',
@@ -1486,7 +1530,7 @@
     })();
 
     /* =========================================================================
-       3. MODULE: AIRPORT CATALOG (36 Real Brazilian & Global IATA Airports)
+       3. MODULE: AIRPORT CATALOG (Brazilian & Global IATA Airports)
        ========================================================================= */
     const AirportCatalog = (() => {
       const AIRPORTS = [
@@ -1509,6 +1553,7 @@
         { iata: 'VIX', city: 'Vitória', name: 'Eurico de Aguiar Salles', country: 'Brasil', region: 'BR', metro: 'VIX', lat: -20.2581, lon: -40.2864 },
         { iata: 'GYN', city: 'Goiânia', name: 'Santa Genoveva', country: 'Brasil', region: 'BR', metro: 'GYN', lat: -16.6320, lon: -49.2207 },
         { iata: 'NAT', city: 'Natal', name: 'São Gonçalo do Amarante', country: 'Brasil', region: 'BR', metro: 'NAT', lat: -5.7681, lon: -35.3761 },
+        { iata: 'MGF', city: 'Maringá', name: 'Regional Sílvio Name Júnior', country: 'Brasil', region: 'BR', metro: 'MGF', lat: -23.476060, lon: -52.016187 },
         // Europe
         { iata: 'LIS', city: 'Lisboa', name: 'Humberto Delgado', country: 'Portugal', region: 'EU', metro: 'PRT', lat: 38.7742, lon: -9.1342 },
         { iata: 'OPO', city: 'Porto', name: 'Francisco Sá Carneiro', country: 'Portugal', region: 'EU', metro: 'PRT', lat: 41.2481, lon: -8.6814 },
@@ -1534,6 +1579,79 @@
 
       const BY_IATA = new Map(AIRPORTS.map((a) => [a.iata, a]));
 
+      let loadPromise;
+      let catalogState = 'local';
+      const SOURCE = 'https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airports.csv';
+
+      function parseCSV(csv) {
+        const rows = [];
+        let row = [], field = '', quoted = false;
+        for (let i = 0; i < csv.length; i++) {
+          const ch = csv[i];
+          if (ch === '"') {
+            if (quoted && csv[i + 1] === '"') { field += '"'; i++; }
+            else quoted = !quoted;
+          } else if (!quoted && ch === ',') {
+            row.push(field); field = '';
+          } else if (!quoted && ch === '\n') {
+            row.push(field.replace(/\r$/, '')); rows.push(row); row = []; field = '';
+          } else field += ch;
+        }
+        if (field || row.length) { row.push(field.replace(/\r$/, '')); rows.push(row); }
+        return rows;
+      }
+
+      function merge(records) {
+        for (const ap of records) {
+          if (!ap || !/^[A-Z]{3}$/.test(ap.iata) || !ap.city || !Number.isFinite(ap.lat) || !Number.isFinite(ap.lon) || BY_IATA.has(ap.iata)) continue;
+          AIRPORTS.push(ap); BY_IATA.set(ap.iata, ap);
+        }
+      }
+
+      function report(state) {
+        catalogState = state;
+        const el = document.getElementById('airportCatalogStatus');
+        if (!el) return;
+        el.removeAttribute('data-i18n');
+        el.textContent = I18N.t('airport.' + state, { n: AIRPORTS.length });
+      }
+
+      function load() {
+        if (loadPromise) return loadPromise;
+        loadPromise = (async () => {
+          report('loading');
+          try {
+            let cache;
+            try { cache = JSON.parse(localStorage.getItem('zfly-airports-v1') || 'null'); } catch (_) {}
+            if (cache && Array.isArray(cache.records)) {
+              merge(cache.records);
+              if (Date.now() - cache.at < 7 * 86400000) { report('online'); return; }
+            }
+            const response = await fetch(SOURCE, { signal: AbortSignal.timeout(20000) });
+            if (!response.ok) throw new Error('Airport catalog HTTP ' + response.status);
+            const rows = parseCSV(await response.text());
+            const headers = rows.shift();
+            const col = Object.fromEntries(headers.map((h, i) => [h, i]));
+            for (const key of ['iata_code','municipality','scheduled_service','latitude_deg','longitude_deg','iso_country','name']) {
+              if (!(key in col)) throw new Error('Unexpected catalog schema');
+            }
+            const countries = new Intl.DisplayNames(['pt-BR'], { type: 'region' });
+            const records = rows.filter(row => row[col.scheduled_service] === 'yes' && row[col.type] !== 'closed' && /^[A-Z]{3}$/.test(row[col.iata_code] || '') && row[col.latitude_deg] && row[col.longitude_deg]).map(row => ({
+              iata: row[col.iata_code], icao: row[col.icao_code] || '', city: row[col.municipality] || row[col.name],
+              name: row[col.name], country: countries.of(row[col.iso_country]) || row[col.iso_country],
+              region: row[col.iso_country] === 'BR' ? 'BR' : row[col.continent],
+              metro: row[col.iata_code], lat: Number(row[col.latitude_deg]), lon: Number(row[col.longitude_deg])
+            }));
+            if (!records.some(ap => ap.iata === 'MGF')) throw new Error('Incomplete catalog');
+            merge(records);
+            try { localStorage.setItem('zfly-airports-v1', JSON.stringify({ at: Date.now(), records })); } catch (_) {}
+            report('online');
+          } catch (_) { report('fallback'); }
+          finally { document.dispatchEvent(new Event('zfly:airports-ready')); }
+        })();
+        return loadPromise;
+      }
+
       function getByIata(code) {
         return BY_IATA.get(String(code || '').toUpperCase().trim()) || null;
       }
@@ -1549,6 +1667,7 @@
           const countryN = Formatters.normalizeSearchText(ap.country);
           let score = 0;
           if (iataN === q) score = 100;
+          else if (String(ap.icao || '').toLowerCase() === q) score = 95;
           else if (iataN.startsWith(q)) score = 85;
           else if (cityN.startsWith(q)) score = 75;
           else if (cityN.includes(q)) score = 55;
@@ -1563,7 +1682,8 @@
       function getNearbyAirports(iata) {
         const base = getByIata(iata);
         if (!base) return [];
-        return AIRPORTS.filter((a) => a.metro === base.metro);
+        return AIRPORTS.filter(a => a.iata === base.iata || (a.metro === base.metro && haversineKm(base, a) <= 150) || haversineKm(base, a) <= 100)
+          .sort((a,b) => haversineKm(base,a) - haversineKm(base,b)).slice(0, 5);
       }
 
       function haversineKm(a, b) {
@@ -1582,7 +1702,7 @@
         return `${ap.city} (${ap.iata})`;
       }
 
-      return { AIRPORTS, getByIata, search, getNearbyAirports, haversineKm, formatDisplay };
+      return { AIRPORTS, getByIata, search, getNearbyAirports, haversineKm, formatDisplay, load, refreshStatus: () => report(catalogState) };
     })();
 
     /* =========================================================================
@@ -1709,13 +1829,13 @@
       /* Active Demo Adapter */
       const DemoCatalogAdapter = {
         id: 'demo-catalog',
-        name: 'Catálogo Demonstrativo RotaClara',
+        name: 'Catálogo Demonstrativo zFLY',
         status: 'active',
         isDemo: true,
         requiresServerProxy: false,
         envVars: [],
-        descriptionPt: 'Gera itinerários determinísticos e coerentes com base em coordenadas reais de 36 aeroportos IATA para demonstração visual e funcional.',
-        descriptionEn: 'Generates deterministic, realistic itineraries based on real coordinates of 36 IATA airports for visual and functional demonstration.',
+        descriptionPt: 'Gera itinerários determinísticos e coerentes com base em coordenadas reais de aeroportos IATA para demonstração visual e funcional.',
+        descriptionEn: 'Generates deterministic, realistic itineraries based on real coordinates of IATA airports for visual and functional demonstration.',
 
         async search(query) {
           const seedBase = JSON.stringify({
@@ -1829,7 +1949,7 @@
                 changeable: isChangeable,
                 fareFamily: hasCheckedBag ? 'Plus (Demo)' : 'Light (Demo)'
               },
-              sourceNote: 'Catálogo Demonstrativo RotaClara (simulação local)'
+              sourceNote: 'Catálogo Demonstrativo zFLY (simulação local)'
             });
           }
 
@@ -3237,6 +3357,7 @@
           inputEl.setAttribute('aria-expanded', 'false');
         };
 
+        document.addEventListener('zfly:airports-ready', () => { if (document.activeElement === inputEl && inputEl.getAttribute('aria-expanded') === 'true') openList(); });
         inputEl.addEventListener('focus', openList);
         inputEl.addEventListener('input', () => {
           onSelect(null); // clear resolved IATA until chosen or exact match
@@ -3569,6 +3690,7 @@
           const field = inp.getAttribute('data-multi-airport');
           const listId = field === 'origin' ? `multiOrigList-${idx}` : `multiDestList-${idx}`;
           const listEl = $(listId);
+          if (AppState.multiLegs[idx]) AppState.multiLegs[idx][field] = '';
           const matches = AirportCatalog.search(inp.value, 6);
           UIRenderer.renderAirportListbox(listEl, matches, 0);
         });
@@ -3892,7 +4014,7 @@
           const offer = AppState.rawOffers.find((o) => o.id === AppState.activeOfferModalId);
           if (!offer) return;
           const lines = [
-            `RotaClara (${I18N.t('badge.demoShort')}) — ${offer.airline.name}`,
+            `zFLY (${I18N.t('badge.demoShort')}) — ${offer.airline.name}`,
             ...offer.legs.map((lg) => `${lg.dateIso}: ${lg.origin} ${lg.departureTime} -> ${lg.destination} ${lg.arrivalTime} (${Formatters.formatDuration(lg.durationMinutes)}, ${lg.flightNumber})`),
             `${I18N.t('details.total')}: ${Formatters.formatCurrency(offer.price.totalBrl, AppState.currency)} (${I18N.t('results.illustrativeConditions')})`
           ];
@@ -3918,6 +4040,18 @@
         syncStandardInputs();
         UIRenderer.applyStaticTranslations();
         bindGlobalEvents();
+        $('langSelect').addEventListener('change', AirportCatalog.refreshStatus);
+        $('realFlightSearchBtn').addEventListener('click', () => {
+          const query = validateAndBuildQuery();
+          if (!query) return;
+          const routes = query.legs.map(leg => leg.origin + ' to ' + leg.destination + ' on ' + leg.date).join('; ');
+          const travelers = query.passengers.adults + ' adults, ' + query.passengers.children + ' children, ' + query.passengers.infants + ' infants';
+          const term = 'Google Flights ' + routes + (query.returnDate ? ' return ' + query.returnDate : '') + ' ' + travelers + ' ' + query.cabin + (query.directOnly ? ' nonstop' : '');
+          const url = new URL('https://www.google.com/search');
+          url.searchParams.set('q', term);
+          window.open(url.href, '_blank', 'noopener,noreferrer');
+        });
+        AirportCatalog.load();
       }
 
       return { init };
