@@ -2,6 +2,35 @@
 
 Comparador de voos com identidade visual inspirada em Liquid Glass e Material Design 3. Pesquisa de aeroportos nacionais e internacionais, comparação demonstrativa e consulta opcional de tarifas reais.
 
+## Identidade visual
+
+A marca zFLY combina um símbolo vetorial de asa e bússola com um gradiente azul, ciano e verde. A tipografia Inter e os ícones Material Symbols Rounded complementam a interface. O sistema visual combina Material Design 3, superfícies translúcidas inspiradas em Liquid Glass e assinatura GitHub em formato Dynamic Island na página principal.
+
+| Tecnologia | Aplicação |
+| --- | --- |
+| HTML5 | Estrutura semântica das páginas |
+| CSS3 | Temas, responsividade e animações |
+| JavaScript | Pesquisa, estado da interface e mapa |
+| Node.js | Integrações de servidor |
+| SVG | Marca e elementos vetoriais |
+| MapLibre GL JS / WebGL | Renderização do mapa do radar |
+
+## zFLY Radar
+
+A página `radar.html` apresenta mapa OpenFreeMap, pesquisa por identificação, altitude em metros, velocidade em km/h e posição recebida da OpenSky Network. A atualização periódica é de 60 segundos, com consultas adicionais ao mover o mapa. Até 500 aeronaves são exibidas por consulta. Não há dados fictícios no radar.
+
+### Configuração
+
+Hospede em ambiente Node.js compatível com `GET /api/radar`. Configure no servidor:
+
+| Variável | Finalidade |
+| --- | --- |
+| `ZFLY_RADAR_ENABLED` | Ativação explícita do endpoint |
+| `OPENSKY_CLIENT_ID` | Identificador OAuth do provedor, quando necessário |
+| `OPENSKY_CLIENT_SECRET` | Segredo OAuth, somente no servidor |
+
+Antes de ativar, confirme os termos e limites da OpenSky, configure proteção contra abuso e valide a cobertura brasileira. GitHub Pages sozinho não executa o endpoint. O código está publicado, mas a integração ao vivo e a interface ainda não foram validadas em produção. Não utilizar para navegação aérea.
+
 ## Funcionalidades
 
 - Busca de aeroportos por cidade, nome ou código IATA, incluindo Maringá (MGF), com tolerância a acentos.
@@ -14,9 +43,14 @@ Comparador de voos com identidade visual inspirada em Liquid Glass e Material De
 
 ```text
 zFLY/
-├── index.html         # Interface, CSS, JavaScript e módulos de pesquisa
+├── index.html         # Interface de passagens
+├── radar.html         # Interface de rastreamento
+├── assets/
+│   ├── css/           # styles.css, identity.css, radar.css
+│   └── js/            # app.js, radar.js
 ├── api/
-│   └── flights.js     # Endpoint Node.js para ofertas reais Duffel
+│   ├── flights.js     # Endpoint Node.js para ofertas reais Duffel
+│   └── radar.js       # Endpoint Node.js para posições ADS-B
 └── README.md         # Documentação e configuração
 ```
 
