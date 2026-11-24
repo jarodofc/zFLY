@@ -763,6 +763,10 @@
 
         <div class="flex flex-wrap items-center justify-between gap-2">
           <p id="airportCatalogStatus" class="zfly-data-status" role="status" data-i18n="airport.local">Catálogo local de aeroportos disponível.</p>
+          <button type="button" id="liveFareBtn" class="m3-btn-outlined px-4 py-2 text-sm inline-flex items-center gap-2">
+            <span class="material-symbols-rounded text-[18px]" aria-hidden="true">travel</span>
+            <span data-i18n="search.liveFares">Consultar tarifas reais</span>
+          </button>
           <button type="button" id="realFlightSearchBtn" class="m3-btn-outlined px-4 py-2 text-sm inline-flex items-center gap-2">
             <span class="material-symbols-rounded text-[18px]" aria-hidden="true">open_in_new</span>
             <span data-i18n="search.realExternal">Consultar voos reais no Google</span>
@@ -777,6 +781,11 @@
       </form>
     </section>
 
+    <section id="liveFarePanel" class="glass-panel p-5 hidden space-y-3" aria-labelledby="liveFareTitle">
+      <h2 id="liveFareTitle" class="font-bold text-base" data-i18n="search.liveFares">Consultar tarifas reais</h2>
+      <p id="liveFareStatus" class="text-sm" role="status"></p>
+      <div id="liveFareResults" class="grid gap-3 sm:grid-cols-2"></div>
+    </section>
     <!-- TRANSPARENCY / DEMO MODE STATUS BANNER -->
     <aside class="glass-panel px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
            style="border-left: 4px solid var(--warning-text);" aria-label="Aviso de modo demonstração">
@@ -1091,6 +1100,13 @@
           'airport.online': 'Catálogo OurAirports: {n} aeroportos disponíveis.',
           'airport.fallback': 'Catálogo local disponível; atualização online indisponível.',
           'search.realExternal': 'Consultar voos reais no Google',
+          'search.liveFares': 'Consultar tarifas reais',
+          'live.loading': 'Consultando o provedor Duffel…',
+          'live.unavailable': 'Tarifas ao vivo indisponíveis. Use a consulta externa no Google; nenhum preço simulado será exibido aqui.',
+          'live.adultsOnly': 'A integração ao vivo aceita apenas adultos por enquanto. Para crianças e bebês, use a consulta externa.',
+          'live.results': 'Duffel: {n} ofertas reais. Preços e disponibilidade podem mudar; confirme com a companhia aérea.',
+          'live.empty': 'Duffel não retornou ofertas para esta consulta.',
+          'live.expires': 'Válida até',
           'search.submit': 'Buscar voos',
           'search.searching': 'Buscando...',
           'search.addLeg': 'Adicionar trecho',
@@ -1260,6 +1276,13 @@
           'airport.online': 'OurAirports catalog: {n} airports available.',
           'airport.fallback': 'Local catalog available; online update unavailable.',
           'search.realExternal': 'Find real flights on Google',
+          'search.liveFares': 'Find live fares',
+          'live.loading': 'Searching Duffel…',
+          'live.unavailable': 'Live fares unavailable. Use the external Google search; simulated prices will not appear here.',
+          'live.adultsOnly': 'Live search currently supports adults only. For children and infants, use external search.',
+          'live.results': 'Duffel: {n} live offers. Prices and availability may change; confirm with the airline.',
+          'live.empty': 'Duffel returned no offers for this query.',
+          'live.expires': 'Expires at',
           'search.submit': 'Search flights',
           'search.searching': 'Searching...',
           'search.addLeg': 'Add flight leg',
@@ -1979,10 +2002,10 @@
         status: 'pending',
         isDemo: false,
         requiresServerProxy: true,
-        endpointHint: 'POST /api/flights/duffel',
+        endpointHint: 'POST /api/flights',
         envVars: ['DUFFEL_ACCESS_TOKEN'],
-        descriptionPt: 'Integração direta NDC com companhias aéreas e regras detalhadas de bagagem. Exige proxy backend com token Bearer.',
-        descriptionEn: 'Direct NDC airline integration with detailed baggage policies. Requires a backend proxy with a Bearer token.',
+        descriptionPt: 'Endpoint opcional para tarifas reais, separado da demonstração. Exige token de produção e ativação no servidor.',
+        descriptionEn: 'Optional live fare endpoint, separate from demo results. Requires a production token and server-side activation.',
         async search() {
           return [];
         }
@@ -4050,6 +4073,39 @@
           const url = new URL('https://www.google.com/search');
           url.searchParams.set('q', term);
           window.open(url.href, '_blank', 'noopener,noreferrer');
+        });
+        $('liveFareBtn').addEventListener('click', async () => {
+          const query = validateAndBuildQuery();
+          if (!query) return;
+          const btn = $('liveFareBtn'), panel = $('liveFarePanel'), status = $('liveFareStatus'), results = $('liveFareResults');
+          panel.classList.remove('hidden'); results.replaceChildren();
+          if (query.passengers.children || query.passengers.infants) { status.textContent = I18N.t('live.adultsOnly'); return; }
+          btn.disabled = true; status.textContent = I18N.t('live.loading');
+          try {
+            const response = await fetch('/api/flights', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(query), signal:AbortSignal.timeout(25000)});
+            if (!response.ok) throw new Error('Unavailable');
+            const data = await response.json();
+            if (data.live !== true || !Array.isArray(data.offers)) throw new Error('Not live');
+            status.textContent = data.offers.length ? I18N.t('live.results', {n:data.offers.length}) : I18N.t('live.empty');
+            for (const offer of data.offers) {
+              const card = document.createElement('article'); card.className = 'glass-pill rounded-2xl p-4 space-y-2';
+              const title = document.createElement('h3'); title.className = 'font-bold'; title.textContent = offer.airline;
+              const price = document.createElement('p'); price.className = 'text-lg font-bold'; 
+              try { price.textContent = new Intl.NumberFormat(AppState.locale, {style:'currency',currency:offer.currency}).format(Number(offer.amount)); }
+              catch (_) { price.textContent = offer.currency + ' ' + offer.amount; }
+              card.append(title, price);
+              for (const slice of offer.slices || []) {
+                const line = document.createElement('p'); line.className = 'text-xs';
+                line.textContent = (slice.segments || []).map(g => g.origin + ' → ' + g.destination + ' · ' + g.departure + ' / ' + g.arrival + ' · ' + g.flight).join(' | ');
+                card.append(line);
+              }
+              if (offer.expiresAt) {
+                const expires = document.createElement('p'); expires.className = 'text-xs'; expires.textContent = I18N.t('live.expires') + ': ' + new Date(offer.expiresAt).toLocaleString(AppState.locale); card.append(expires);
+              }
+              results.append(card);
+            }
+          } catch (_) { status.textContent = I18N.t('live.unavailable'); }
+          finally { btn.disabled = false; }
         });
         AirportCatalog.load();
       }
